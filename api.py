@@ -133,7 +133,7 @@ def get_expanses():
     elif filter_type == '3months':
         start_date = (today - datetime.timedelta(days=90)).isoformat()
         end_date = today.isoformat()
-    # For 'custom', start_date and end_date are provided by the user
+ 
 
     query = 'SELECT * FROM expanses WHERE user_id = ?'
     params = [user_id]
