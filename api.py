@@ -119,9 +119,32 @@ def logout_user():
 def get_expanses():
     db = get_db()
     user_id = g.user_id['user_id']
-    expanses = db.execute('''
-        SELECT * FROM expanses WHERE user_id = ?
-    ''', (user_id,)).fetchall()
+    filter_type = request.args.get('filter')
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    today = datetime.date.today()
+
+    if filter_type == 'week':
+        start_date = (today - datetime.timedelta(days=7)).isoformat()
+        end_date = today.isoformat()
+    elif filter_type == 'month':
+        start_date = (today - datetime.timedelta(days=30)).isoformat()
+        end_date = today.isoformat()
+    elif filter_type == '3months':
+        start_date = (today - datetime.timedelta(days=90)).isoformat()
+        end_date = today.isoformat()
+    # For 'custom', start_date and end_date are provided by the user
+
+    query = 'SELECT * FROM expanses WHERE user_id = ?'
+    params = [user_id]
+    if start_date:
+        query += ' AND date(created_at) >= date(?)'
+        params.append(start_date)
+    if end_date:
+        query += ' AND date(created_at) <= date(?)'
+        params.append(end_date)
+
+    expanses = db.execute(query, params).fetchall()
     result = [
         {
             'id': expanse['id'],
